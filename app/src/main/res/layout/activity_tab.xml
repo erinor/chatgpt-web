@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent">
+
+    <LinearLayout
+         android:layout_height="40dp"
+         android:layout_width="match_parent"
+         android:background="@color/tabbar"
+         android:elevation="5dp"
+         android:orientation="horizontal"
+         android:id="@+id/tab_bar">
+
+        <include
+             layout="@layout/image_tab"
+             android:id="@+id/tab1" />
+
+        <include
+             layout="@layout/image_tab"
+             android:id="@+id/tab2" />
+
+        <include
+             layout="@layout/image_tab"
+             android:id="@+id/tab3" />
+
+        <include
+             layout="@layout/image_tab"
+             android:id="@+id/tab4" />
+
+        <include
+             layout="@layout/image_tab"
+             android:id="@+id/tab5" />
+
+    </LinearLayout>
+
+    <FrameLayout
+         android:layout_height="match_parent"
+         android:layout_width="match_parent"
+         android:layout_below="@+id/tab_bar"
+         android:id="@+id/webview_container">
+
+    </FrameLayout>
+
+    <FrameLayout
+         android:layout_height="1.2dp"
+         android:layout_width="match_parent"
+         android:layout_below="@+id/tab_bar">
+
+        <ProgressBar
+             android:layout_height="10dp"
+             android:layout_width="match_parent"
+             android:indeterminate="true"
+             style="?android:attr/progressBarStyleHorizontal"
+             android:indeterminateTint="#f00"
+             android:id="@+id/progressBar"
+             android:layout_gravity="center" />
+
+    </FrameLayout>
+
+</RelativeLayout>

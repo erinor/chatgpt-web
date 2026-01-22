@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="DayNight">#000000</color>
+    <color name="invert">#FFFFFF</color>
+    <color name="tabbar">#2a1d55</color>
+    <color name="PrimaryDark">#1F133B</color>
+    <color name="Accent">#76D0EB</color>
+</resources>

@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="AppTheme.Splash" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:colorPrimaryDark">@color/PrimaryDark</item>
+        <item name="android:colorAccent">@color/Accent</item>
+        <item name="android:windowBackground">@color/DayNight</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash</item>
+    </style>
+</resources>
