@@ -1,0 +1,140 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/layout/image_tab.xml",
+      "selection": {
+        "end": {
+          "column": 46,
+          "index": 98,
+          "line": 2
+        },
+        "start": {
+          "column": 46,
+          "index": 98,
+          "line": 2
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/layout/activity_tab.xml",
+      "selection": {
+        "end": {
+          "column": 34,
+          "index": 256,
+          "line": 7
+        },
+        "start": {
+          "column": 34,
+          "index": 256,
+          "line": 7
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/drawable/tab_selector.xml",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        },
+        "start": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/drawable/splash.xml",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        },
+        "start": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/drawable/ic_tab_bold.xml",
+      "selection": {
+        "end": {
+          "column": 27,
+          "index": 264,
+          "line": 7
+        },
+        "start": {
+          "column": 27,
+          "index": 264,
+          "line": 7
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/drawable/ic_tab.xml",
+      "selection": {
+        "end": {
+          "column": 54,
+          "index": 293,
+          "line": 7
+        },
+        "start": {
+          "column": 54,
+          "index": 293,
+          "line": 7
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/drawable/ic_logo.xml",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        },
+        "start": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/values/colors.xml",
+      "selection": {
+        "end": {
+          "column": 40,
+          "index": 134,
+          "line": 3
+        },
+        "start": {
+          "column": 42,
+          "index": 93,
+          "line": 2
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/values-night/colors.xml",
+      "selection": {
+        "end": {
+          "column": 32,
+          "index": 126,
+          "line": 3
+        },
+        "start": {
+          "column": 32,
+          "index": 126,
+          "line": 3
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChatGPT/app/src/main/res/values-night/colors.xml"
+}
