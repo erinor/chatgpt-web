@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.webview.chatgpt">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+
+    <application
+        android:name=".MyApp"
+        android:icon="@mipmap/ic"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme.Splash">
+        <activity
+            android:name=".Tab1Activity"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:exported="true"
+            android:process=":tab1" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Tab2Activity"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:exported="false"
+            android:process=":tab2" />
+        <activity
+            android:name=".Tab3Activity"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:exported="false"
+            android:process=":tab3" />
+        <activity
+            android:name=".Tab4Activity"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:exported="false"
+            android:process=":tab4" />
+        <activity
+            android:name=".Tab5Activity"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:exported="false"
+            android:process=":tab5" />
+    </application>
+</manifest>
