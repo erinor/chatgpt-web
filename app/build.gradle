@@ -6,13 +6,13 @@ android {
     namespace 'com.webview.chatgpt'
     compileSdk 35
     buildToolsVersion "35.0.2"
-    
+
     defaultConfig {
         applicationId "com.webview.chatgpt"
         minSdk 29
         targetSdk 35
-        versionCode 1
-        versionName "1.1_initial"
+        versionCode 120
+        versionName "1.2_initial"
     }
 
     buildTypes {
@@ -22,6 +22,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             vcsInfo.include = false
         }
+    }
+
+    packaging {
+        resources.excludes.add("META-INF/com/android/build/gradle/app-metadata.properties")
+        resources.excludes.add("META-INF/*.version")
     }
 
     compileOptions {

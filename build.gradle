@@ -1,6 +1,6 @@
 // Top-level build file
 plugins {
-    // This handles the downloading of AGP 8.2.0
+    // This handles the downloading of AGP 8.7.3
     id 'com.android.application' version '8.7.3' apply false
     id 'com.android.library' version '8.7.3' apply false
 }

@@ -26,7 +26,6 @@ public class Tab1Activity extends BaseActivity {
 
 
         WebViewManager.setupWebView(this, webView, "https://chatgpt.com", progressBar);
-        WebViewManager.ensureMicPermission(this);
     }
 
     @Override
