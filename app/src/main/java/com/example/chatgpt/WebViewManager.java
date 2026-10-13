@@ -1,4 +1,4 @@
-package com.webview.chatgpt;
+package com.example.chatgpt;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -10,9 +10,9 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.ViewGroup;
-import android.provider.MediaStore;
 import android.view.View;
 import android.webkit.*;
 import android.widget.ProgressBar;
@@ -21,29 +21,40 @@ import android.widget.Toast;
 public class WebViewManager {
 
     public static final int FILE_PICKER_REQUEST_CODE = 1001;
-    private static final int MIC_PERMISSION_REQUEST_CODE = 2002;
-    private static ValueCallback<Uri[]> fileCallback;
-    private static Uri cameraUri;
+    public static final int MIC_PERMISSION_REQUEST_CODE = 2002;
 
-    public static void setupWebView(Activity activity, WebView webView, String url, ProgressBar progressBar) {
+    // NEW: Interface to safely pass events back to the single MainActivity
+    public interface WebViewHostCallback {
+        void onShowFileChooser(Intent intent, ValueCallback<Uri[]> callback, Uri cameraUri);
+        void onRequestMicPermission(PermissionRequest request);
+    }
 
+    public static void setupWebView(
+            Activity activity, 
+            WebView webView, 
+            String url, 
+            ProgressBar progressBar,
+            CookieManager isolatedCookieManager, // Pass isolated cookies
+            WebViewHostCallback hostCallback     // Pass isolated callbacks
+    ) {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setForceDark(WebSettings.FORCE_DARK_AUTO);
         settings.setLoadWithOverviewMode(true);
         settings.setMediaPlaybackRequiresUserGesture(true);
-        
-        CookieManager.getInstance().setAcceptCookie(true);
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+
+        isolatedCookieManager.setAcceptCookie(true);
+        isolatedCookieManager.setAcceptThirdPartyCookies(webView, true);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView webView, String url) {
                 super.onPageFinished(webView, url);
                 if (url.contains("login") || url.contains("auth") || url.contains("sign") || url.contains("password")) {
-                    CookieManager.getInstance().flush();
+                    isolatedCookieManager.flush();
                 }
+                // Kept your excellent Blob interception logic!
                 webView.evaluateJavascript("javascript:if(!window.blobStorage){window.blobStorage={};var orig=URL.createObjectURL;URL.createObjectURL=function(b){var u=orig.call(URL,b);window.blobStorage[u]=b;return u;}}", null);
             }
         });
@@ -60,68 +71,57 @@ public class WebViewManager {
             }
 
             @Override
-            public boolean onShowFileChooser(
-                    WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
-                if (fileCallback != null) fileCallback.onReceiveValue(null);
-                fileCallback = callback;
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 boolean wantsImage = false;
-
                 for (String type : params.getAcceptTypes()) {
                     if (type != null && type.startsWith("image")) {
                         wantsImage = true;
                         break;
                     }
                 }
+                
+                Uri cameraUri = null;
+                Intent intent;
+
                 if (wantsImage && params.isCaptureEnabled()) {
-                    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     cameraUri = createImageUri(activity);
                     if (cameraUri != null) {
-                        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
-                        activity.startActivityForResult(
-                                cameraIntent, FILE_PICKER_REQUEST_CODE);
-                        return true;
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
                     }
+                } else {
+                    intent = params.createIntent();
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
-                Intent intent = params.createIntent();
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                activity.startActivityForResult(intent, FILE_PICKER_REQUEST_CODE);
+
+                // Delegate to Activity to handle safely
+                if (hostCallback != null) {
+                    hostCallback.onShowFileChooser(intent, callback, cameraUri);
+                }
                 return true;
             }
 
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                activity.runOnUiThread(() -> {
-                    if (activity.checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) !=
-                            android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                        activity.requestPermissions(
-                                new String[] { android.Manifest.permission.RECORD_AUDIO },
-                                MIC_PERMISSION_REQUEST_CODE
-                        );
-                        return;
-                    }
-                    request.grant(request.getResources());
-                });
+                if (hostCallback != null) {
+                    hostCallback.onRequestMicPermission(request);
+                }
             }
         });
 
         webView.addJavascriptInterface(new BlobDownloader(activity), "AndroidDownloader");
-        setupDownloadManager(activity, webView);
+        setupDownloadManager(activity, webView, isolatedCookieManager);
         webView.loadUrl(url);
     }
 
-    // -- Helper method --
-
-    private static void setupDownloadManager(Activity activity, WebView webView) {
+    private static void setupDownloadManager(Activity activity, WebView webView, CookieManager cookieManager) {
         webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
-
-            // 1. Intercept blob
             if (url.startsWith("blob:")) {
                 Toast.makeText(activity, "Downloading...", Toast.LENGTH_SHORT).show();
                 webView.evaluateJavascript("javascript:var b=window.blobStorage['"+url+"'],s=function(x){var r=new FileReader();r.onloadend=function(){AndroidDownloader.processBlobData(r.result,x.type);};r.readAsDataURL(x);};if(b)s(b);else fetch('"+url+"').then(res=>res.blob()).then(s);", null);
                 return;
             }
 
-            // 2. Standard fallback download
             String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
             if (contentDisposition != null && contentDisposition.contains("filename*=")) {
                 fileName = Uri.decode(contentDisposition.split("filename\\*=")[1].split(";")[0].replaceAll("(?i)^UTF-8''|[\"']", ""));
@@ -132,7 +132,8 @@ public class WebViewManager {
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
             request.setDescription("Downloading file...");
 
-            String cookie = CookieManager.getInstance().getCookie(url);
+            // NEW: Use isolated cookie manager
+            String cookie = cookieManager.getCookie(url);
             if (cookie != null) request.addRequestHeader("Cookie", cookie);
             if (userAgent != null) request.addRequestHeader("User-Agent", userAgent);
 
@@ -142,6 +143,26 @@ public class WebViewManager {
         });
     }
 
+    private static Uri createImageUri(Context context) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "photo");
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+    }
+
+    public static void handleOnBackPressed(Activity activity, WebView webView) {
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            new AlertDialog.Builder(activity)
+                    .setMessage("Do you want to exit the app?")
+                    .setPositiveButton("Yes", (dialog, which) -> activity.finishAffinity())
+                    .setNegativeButton("No", null)
+                    .show();
+        }
+    }
+
+    // BlobDownloader class remains exactly identical to your old code!
     public static class BlobDownloader {
         private final Context context;
         private final Handler handler;
@@ -157,7 +178,6 @@ public class WebViewManager {
                 try {
                     String base64 = base64Data.replaceFirst("^data:.*?;base64,", "");
                     byte[] fileBytes = Base64.decode(base64, Base64.DEFAULT);
-
                     String cleanMimeType = mimeType.split(";")[0];
                     String mappedExt = MimeTypeMap.getSingleton().getExtensionFromMimeType(cleanMimeType);
                     String ext = (mappedExt != null && !mappedExt.isEmpty()) ? "." + mappedExt : ".bin";
@@ -179,75 +199,6 @@ public class WebViewManager {
                     handler.post(() -> Toast.makeText(context, "Save failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
                 }
             }).start();
-        }
-    }
-
-    public static void handleFileResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != FILE_PICKER_REQUEST_CODE || fileCallback == null) return;
-        Uri[] results = null;
-        if (resultCode == Activity.RESULT_OK) {
-            if (data == null && cameraUri != null) {
-                results = new Uri[] {cameraUri};    // Camera result
-            } else if (data != null) {
-                if (data.getClipData() != null) {   // Multiple files
-                    int count = data.getClipData().getItemCount();
-                    results = new Uri[count];
-                    for (int i = 0; i < count; i++) {
-                        results[i] = data.getClipData().getItemAt(i).getUri();
-                    }
-                } else if (data.getData() != null) { // Single file
-                    results = new Uri[] {data.getData()};
-                }
-            }
-        }
-        fileCallback.onReceiveValue(results);
-        fileCallback = null;
-        cameraUri = null;
-    }
-
-    private static Uri createImageUri(Context context) {
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "photo");
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-        return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-    }
-
-    // -- Lifecycle --
-
-    public static void handleOnBackPressed(Activity activity, WebView webView) {
-        if (webView != null && webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            new AlertDialog.Builder(activity)
-                    .setMessage("Do you want to exit the app?")
-                    .setPositiveButton("Yes", (dialog, which) -> activity.finishAffinity())
-                    .setNegativeButton("No", null)
-                    .show();
-        }
-    }
-
-    public static void onResume(WebView webView) {
-        if (webView != null) {
-            webView.onResume();
-            webView.resumeTimers();
-        }
-    }
-
-    public static void onPause(WebView webView) {
-        if (webView != null) {
-            webView.onPause();
-            webView.pauseTimers();
-        }
-    }
-
-    public static void destroyWebView(WebView webView) {
-        if (webView != null) {
-            webView.loadUrl("about:blank");
-            webView.clearHistory();
-            ViewGroup parent = (ViewGroup) webView.getParent();
-            if (parent != null) parent.removeView(webView);
-            webView.removeAllViews();
-            webView.destroy();
         }
     }
 }

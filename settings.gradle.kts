@@ -14,6 +14,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "ChatGPT"
+rootProject.name = "chatgpt-web"
 
 include(":app")
